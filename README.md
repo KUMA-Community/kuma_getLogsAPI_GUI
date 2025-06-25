@@ -64,4 +64,5 @@ streamlit run KUMA_getLogAPI_GUI.py
 - Логирование всех событий в файл `logfile.txt`
 
 ## Demo
-![KUMA_getLogAPI_GUI_GIF](https://github.com/user-attachments/assets/22297797-b81e-4b66-85c7-0e6693892710)
+![KUMA_getLogAPI_GUI_GIF](https://github.com/user-attachments/assets/4ba8cb38-54aa-4021-81c6-1ee9dcabe3d3)
+
