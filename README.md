@@ -63,6 +63,6 @@ streamlit run KUMA_getLogAPI_GUI.py
 - Скачивание данных
 - Логирование всех событий в файл `logfile.txt`
 
-## Demo
+## Demo (GIF долго грузится)
 ![KUMA_getLogAPI_GUI_GIF](https://github.com/user-attachments/assets/4ba8cb38-54aa-4021-81c6-1ee9dcabe3d3)
 
