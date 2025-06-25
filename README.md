@@ -52,8 +52,14 @@ pip install -r requirements.txt
 streamlit run KUMA_getLogAPI_GUI.py
 ```
 
+или
+
+```bash
+/usr/bin/python3.12 -m streamlit run getLogAPI_GUI.py
+```
+
 ## Требования
-- Python 3.9+
+- Python 3.12+
 - Библиотеки: `streamlit`, `requests`, `socket`
 - Совместимость: Windows, Linux, macOS
 
