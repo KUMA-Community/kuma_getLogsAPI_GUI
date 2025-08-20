@@ -49,7 +49,7 @@ pip install -r requirements.txt
 ## Запуск
 
 ```cmd
-streamlit run KUMA_getLogAPI_GUI.py
+streamlit run getLogAPI_GUI.py
 ```
 
 или
