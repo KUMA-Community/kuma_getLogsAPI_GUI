@@ -64,6 +64,12 @@ streamlit run KUMA_getLogAPI_GUI.py
 /usr/bin/python3.12 -m streamlit run getLogAPI_GUI.py --server.fileWatcherType=none --server.port=8080 
 ```
 
+Запуск на определенном порту и адресе
+
+```bash
+/usr/bin/python3.12 -m streamlit run getLogAPI_GUI.py --server.fileWatcherType=none --server.address=0.0.0.0 --server.port=8080 
+```
+
 ## Требования
 - Python 3.12+
 - Библиотеки: `streamlit`, `requests`, `socket`
