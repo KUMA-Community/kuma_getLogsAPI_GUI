@@ -22,10 +22,10 @@
 Можно указывать заголовки и тело запроса в формате JSON.
 
 ### 2. **Обработка логов**
-Позволяет фильтровать только новые логи:
+Позволяет фильтровать и отправлять только новые логи, сортировка и отслеживание (файл состояния: `log_state.json`) по:
 - По ID
 - По timestamp
-- По пользовательскому полю (`lastSeen`)
+- По пользовательскому полю, возможность задать (например, `lastSeen`)
 
 Логи хранятся в состоянии между запросами и обновляются после каждого успешного получения новых записей.
 
@@ -55,7 +55,13 @@ streamlit run KUMA_getLogAPI_GUI.py
 или
 
 ```bash
-/usr/bin/python3.12 -m streamlit run getLogAPI_GUI.py
+/usr/bin/python3.12 -m streamlit run getLogAPI_GUI.py --server.fileWatcherType=none
+```
+
+Запуск на определенном порту
+
+```bash
+/usr/bin/python3.12 -m streamlit run getLogAPI_GUI.py --server.fileWatcherType=none --server.port=8080 
 ```
 
 ## Требования
@@ -65,10 +71,13 @@ streamlit run KUMA_getLogAPI_GUI.py
 
 ## Возможности UI
 - Темная/светлая тема оформления
-- Визуализация ответа API (JSON/raw text)
-- Скачивание данных
-- Логирование всех событий в файл `logfile.txt`
+- Визуализация ответа API (JSON / RAW text)
+- Скачивание данных по запросу
+- Логирование всех событий в файл `logfile.txt` (пишется рядом с python файлом)
 
 ## Demo (GIF долго грузится)
 ![KUMA_getLogAPI_GUI_GIF](https://github.com/user-attachments/assets/4ba8cb38-54aa-4021-81c6-1ee9dcabe3d3)
 
+## **Дальнейшее развитие**
+- Сохранение профиля сбора в файл, чтобы не держать вкладку открытой
+- Создание профилей сбора для нескольких источников на одной странице
