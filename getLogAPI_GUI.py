@@ -179,7 +179,7 @@ def build_auth_params(profile):
         if cert_file:
             cert = (BytesIO(cert_file.read()), BytesIO(key_file.read()) if key_file else None)
     else:
-        headers = json.loads(st.session_state.get("headers_input", "{}")) if user_headers else {}
+        headers = json.loads(st.session_state.get("headers_input", "{}")) if st.session_state.get("headers_input", "{}") else {}
 
     return headers, auth, cert
 
@@ -545,4 +545,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
