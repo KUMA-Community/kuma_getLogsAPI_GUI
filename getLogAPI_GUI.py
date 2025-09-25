@@ -128,7 +128,7 @@ st.session_state.method = st.selectbox("HTTP Method", ["GET", "POST", "PUT", "DE
 st.session_state.verify_ssl = st.checkbox("Verify SSL Certificates", value=False)
 
 
-st.session_state.auth_method = st.selectbox("Auth Method", ["No", "Bearer Token", "Basic Auth", "Client Certificate"], index=None)
+st.session_state.auth_method = st.selectbox("Auth Method", ["No", "Bearer Token", "OAuth", "Basic Auth", "Client Certificate"], index=None)
 
 st.session_state.headers_input = st.text_area("Optional Headers (JSON format)", value="", placeholder=r'{"Authorization": "Bearer $bearer" or "user":"bob","pass":"$password"}', help=r"Avaliable variables \$bearer and \$password", height=100)
 
@@ -136,6 +136,9 @@ st.session_state.auth_data = {}
 if st.session_state.auth_method == "Bearer Token":
     st.session_state.auth_data["token"] = st.text_input("Bearer Token", type="password")
     st.session_state.headers_input = sub(r'\$bearer', st.session_state.auth_data["token"], st.session_state.headers_input)
+elif st.session_state.auth_method == "OAuth":
+    st.session_state.auth_data["token"] = st.text_input("OAuth", type="password")
+    st.session_state.headers_input = sub(r'\$oauth', st.session_state.auth_data["token"], st.session_state.headers_input)
 elif st.session_state.auth_method == "Basic Auth":
     st.session_state.auth_data["username"] = st.text_input("Username")
     st.session_state.auth_data["password"] = st.text_input("Password", type="password")
@@ -171,6 +174,8 @@ def build_auth_params(profile):
 
     if method == "Bearer Token":
         headers["Authorization"] = f"Bearer {data.get('token')}"
+    elif method == "OAuth":
+        headers["Authorization"] = f"OAuth {data.get('token')}"
     elif method == "Basic Auth":
         auth = (data.get("username"), data.get("password"))
     elif method == "Client Certificate":
@@ -304,7 +309,7 @@ st.markdown("---")
 # Logs Tool
 st.subheader("Get & Sort logs from request")
 #st.json(state)
-
+st.session_state.key_path = st.text_input("Enter top-level JSON key", value="items")
 st.session_state.state_type = st.selectbox("Choose or Enter log state tracking method:", ("none", "id", "timestamp", "lastSeen"), index=None, placeholder="Select log iteration method...", 
                           help="Chose iteration field or enter your own value (Handle types safely: timestamp as str (ISO), id as int)", accept_new_options=True)
 state = load_state()
@@ -336,14 +341,27 @@ with col2:
 with col3:
     show_logs = st.checkbox("Show output logs")
 
+def get_nested_value(d, path):
+    """Возвращает значение по ключу, включая вложенные (event.occurred_at)."""
+    keys = path.split(".")
+    for k in keys:
+        if isinstance(d, dict):
+            d = d.get(k)
+        else:
+            return None
+    return d
 
 def is_new_log(log, state_value, state_type):
     try:
-        if st.session_state.state_type == "id":
-            return int(log[state_type]) > int(state_value)
-        else:
-            return str(log[state_type]) > str(state_value)
-    except Exception as e:
+        value = get_nested_value(log, state_type) 
+        if value is None:
+            return False
+        if state_type.endswith("id"):  # для числового сравнения
+            return int(value) > int(state_value)
+        else:  # строки, даты (ISO) и прочее
+            return str(value) > str(state_value)
+    except Exception:
+        logging.warning(f"is_new_log compare failed: {e}")
         return False
 
 
@@ -354,9 +372,28 @@ def get_logs():
             logs = st.session_state.response_data.get("json", [])
             #logs = get_simulated_logs(state)
 
+            if st.session_state.key_path:
+                try:
+                    if isinstance(logs, (dict, list)):
+                        data = logs
+                    else:
+                        data = json.loads(logs)
+
+                    extracted = data.get(st.session_state.key_path, [])
+                    #st.subheader("Extracted result:")
+                    #st.json(extracted)
+
+                    if extracted is None:
+                        st.warning("Nothing found for that key path")
+                    else:
+                        logs = extracted
+
+                except Exception as e:
+                    st.error(f"Invalid JSON or path: {e}")
+            #st.json(logs)
             try:
                 # Sort response records by st.session_state.state_type key
-                logs = sorted(logs, key=lambda x: x.get(st.session_state.state_type, ""))
+                logs = sorted(logs, key=lambda x: get_nested_value(x, st.session_state.state_type) or "")
                 #st.markdown(f"📌 Sorted by `{st.session_state.state_type}`")
             except Exception as e:
                 st.warning(f"[GET LOGS] ⚠️ Could not sort records: {e}")
@@ -373,7 +410,7 @@ def get_logs():
                     else:
                         #state = max(log["timestamp"] for log in logs)
                         if st.session_state.state_type != "none":
-                            save_state(logs[-1][st.session_state.state_type])
+                            save_state(get_nested_value(logs[-1], st.session_state.state_type))
                         st.success(f"✅ **{len(st.session_state.new_logs)}** new logs retrieved. Updated last state to: `{load_state()}`")
                         logging.info(f"[GET LOGS] {len(st.session_state.new_logs)} new logs retrieved. Updated last state to: {load_state()}")
                         st.session_state.succ_get_logs = True
@@ -545,5 +582,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
